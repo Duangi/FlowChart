@@ -1,2 +1,2 @@
 # FlowChart
-基于vue + G6实现的可拖拽流程图
+基于vue + jsplumb实现的可拖拽流程图
