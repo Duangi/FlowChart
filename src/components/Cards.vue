@@ -22,15 +22,16 @@
           <div>
             <el-row>
               <el-col v-for="(branch,index) in card.branchArray" :key="index" :span="4">
-                <div class="buttoncontainer">
-                  <el-button type="text" class="deletebutton" v-show="!readonly" icon="el-icon-close" @click="deleteLink(index)"></el-button>
-                  <el-button class="linkbutton" type="primary" >{{ branch.branchType}}</el-button>
+                <div class="buttoncontainer" v-bind:id="card.nodeName + branch.branchType">
+                  <el-button type="text" class="deletebutton" v-show="!readonly" icon="el-icon-close" @click="deleteLink(card.nodeName,branch.branchType)"></el-button>
+<!--                  <div v-bind:id="card.nodeName + branch.branchType" >{{ branch.branchType}}</div>-->
+                  <el-button  class="linkbutton" type="primary" >{{ branch.branchType}}</el-button>
                 </div>
 
               </el-col>
 
 
-              <el-select class="selector" v-model="value" v-show="card.addselector" placeholder="请选择" @change="">
+              <el-select class="selector" v-model="value" v-show="card.addselector" placeholder="请选择" @change="addSelectorButtonClicked(value,)">
                 <el-option
                   v-for="item in options"
                   :key="item.value"
@@ -197,40 +198,40 @@ export default {
         },
       ],
       options: [{
-        value: '选项1',
+        value: '正向',
         label: '正向'
       }, {
-        value: '选项2',
+        value: '肯定',
         label: '肯定'
       }, {
-        value: '选项3',
+        value: '拒绝',
         label: '拒绝'
       }, {
-        value: '选项4',
+        value: '其他',
         label: '其他'
       }, {
-        value: '选项5',
+        value: '待确认',
         label: '待确认'
       },{
-        value: '选项6',
+        value: '待定',
         label: '待定'
       },{
-        value: '选项7',
+        value: '快说',
         label: '快说'
       },{
-        value: '选项8',
+        value: '投诉',
         label: '投诉'
       },{
-        value: '选项9',
+        value: '重复',
         label: '重复'
       },{
-        value: '选项10',
+        value: '确认',
         label: '确认'
       },{
-        value: '选项11',
+        value: '参加',
         label: '参加'
       },{
-        value: '选项12',
+        value: '在听',
         label: '在听'
       }
       ],
@@ -239,9 +240,9 @@ export default {
     }
   },
   methods:{
-    // 初始化关系图，并渲染数据
-    addSelectorButton(){
-      console.log(this.cardInfo[0].content);
+    // 添加分支按钮按下
+    addSelectorButtonClicked(value){
+      console.log("当前选择：" +value);
     },
     toggleEditable(){
       //如果当前处于不能编辑状态，则将状态修改，并修改图标为保存
@@ -255,18 +256,24 @@ export default {
         this.edit_button_icon = "el-icon-edit";
       }
     },
-    deleteLink(index){
-      if(this.cardInfo[0].linktype[index]){
-        this.cardInfo[0].linktype.splice(index,1);
-      }
-    },
-    deleteCard(index){
-      if(this.cardInfo[index]){
-        this.cardInfo.splice(index,1);
+    deleteLink(nodeName,branchType){
+      this.removeNode(nodeName+branchType);
+      //删除结构中的数据
+      for (let i = 0;i<this.cardInfo.speechcraftList.length;i++){
+        if(this.cardInfo.speechcraftList[i].nodeName == nodeName){
+          for(let k = 0;k<this.cardInfo.speechcraftList[i].branchArray.length;k++){
+            if(this.cardInfo.speechcraftList[i].branchArray[k].branchType == branchType){
+              //找到该节点，并将该节点删除
+              this.cardInfo.speechcraftList[i].branchArray.splice(k,1);
+              return;
+            }
+          }
+        }
       }
     },
     orderData(cardInfo){
-      let data = cardInfo;
+      let dataJson = JSON.stringify(cardInfo);
+      let data = JSON.parse(dataJson);
       let nodeList = data.speechcraftList;
 
       //获取头节点
@@ -279,6 +286,7 @@ export default {
             index:0,
             style:"",
             branchArray:"",
+            addselector:false,
           };
           // console.log("找到头节点");
           //删除该元素并添加到list，并将所有分支节点的名字添加到list
@@ -305,7 +313,9 @@ export default {
               source:"",
               target:""
             };
-            line['source'] = nodeList[i].nodeName;
+            let btnName = nodeList[i].nodeName + nodeList[i].branchArray[j].branchType;
+            line['source'] = btnName;
+            // this.addPoint(btnName,'Bottom');
             line['target'] = nodeList[i].branchArray[j].branchNode;
             //将连线加入list
             this.branchList.push(line);
@@ -325,12 +335,12 @@ export default {
       if(this.travelsalList.length == 0){
         return;
       }
-      for(let i = 0;i<this.travelsalList.length;i++){
-        console.log("当前遍历数组中还剩:"+this.travelsalList[i].branchNode + "节点")
-      }
-      for(let i = 0;i<nodeList.length;i++){
-        console.log("当前nodeList中还剩:"+nodeList[i].nodeName + " 节点")
-      }
+      // for(let i = 0;i<this.travelsalList.length;i++){
+      //   console.log("当前遍历数组中还剩:"+this.travelsalList[i].branchNode + "节点")
+      // }
+      // for(let i = 0;i<nodeList.length;i++){
+      //   console.log("当前nodeList中还剩:"+nodeList[i].nodeName + " 节点")
+      // }
       // 遍历所有list中上一层访问到的节点
       for(let i = 0 ; i < this.travelsalList.length;i++){
         //获取该节点的name
@@ -340,23 +350,25 @@ export default {
         let currentX = this.travelsalList[i].x;
         //通过name从nodeList中找到对应的node
         let nodeIndex = -1;
-        console.log("当前正在寻找" + name + "节点");
+        // console.log("当前正在寻找" + name + "节点");
         for(let j=0;j<nodeList.length;j++){
-          console.log("当前节点为" + nodeList[j].nodeName);
+          // console.log("当前节点为" + nodeList[j].nodeName);
           if(nodeList[j].nodeName == name){
             nodeIndex = j;
-            console.log("从nodeList中找到" + nodeList[j].nodeName);
+            // console.log("从nodeList中找到" + nodeList[j].nodeName);
             break;
           }
         }
         if(nodeIndex != -1){
-          console.log("当前正在遍历 "+nodeList[nodeIndex].nodeName+" 节点")
+          // console.log("当前正在遍历 "+nodeList[nodeIndex].nodeName+" 节点")
+          // this.addPoint(nodeList[nodeIndex].nodeName,"Top");
           let nodeInfo = {
             nodeName:"",
             content:"",
             index:0,
             style:"",
             branchArray:"",
+            addselector:false,
           };
           nodeInfo['nodeName'] = nodeList[nodeIndex].nodeName;
           nodeInfo['content'] = nodeList[nodeIndex].speechcraftContent;
@@ -379,9 +391,12 @@ export default {
               source:"",
               target:""
             };
-            line['source'] = nodeList[nodeIndex].nodeName;
+            let btnName = nodeList[nodeIndex].nodeName + nodeList[nodeIndex].branchArray[j].branchType;
+            line['source'] = btnName;
+            // this.addPoint(btnName,"Bottom");
+
             line['target'] = nodeList[nodeIndex].branchArray[j].branchNode;
-            console.log(line['source']+"->"+line['target']+" 连线 已被加入");
+            // console.log(line['source']+"->"+line['target']+" 连线 已被加入");
             this.branchList.push(line);
             //将该node的所有分支节点<不重复的>添加到应该遍历的list中
             for (let k =0;k<nodeList[nodeIndex].branchArray.length;k++){
@@ -395,7 +410,7 @@ export default {
                 if (branchInfo['index'] + 1 > this.nodeStruct.length)
                 this.travelsalList.push(branchInfo);
                 this.travelsalListNames.push(branchInfo['branchNode']);
-                console.log(nodeList[nodeIndex].branchArray[k].branchNode + "已被添加到遍历数组");
+                // console.log(nodeList[nodeIndex].branchArray[k].branchNode + "已被添加到遍历数组");
               }
             }
 
@@ -403,9 +418,9 @@ export default {
           //把当前节点从遍历list中移除
           nodeList.splice(nodeIndex,1);
           this.travelsalList.splice(i,1);
-          for(let i = 0;i<nodeList.length;i++){
-            console.log("当前nodeList中还剩:"+nodeList[i].nodeName + " 节点")
-          }
+          // for(let i = 0;i<nodeList.length;i++){
+          //   console.log("当前nodeList中还剩:"+nodeList[i].nodeName + " 节点")
+          // }
           //继续遍历
           this.nodeTraversal(nodeList);
         }
@@ -419,23 +434,79 @@ export default {
           this.nodeStruct[i][j].style = "top:+"+ top +"px;left:"+left+"px"
         }
       }
+    },
+    //传入一个node的name，该函数默认给card加上上断点，用于连线
+    addPoint(nodeName,position,maxConnections=1){
+      let ins = this.$jsPlumb;
+      let common = {
+        isSource: true,
+        isTarget: true,
+        connector: ['Bezier'],
+        maxConnections: maxConnections
+      }
+      ins.ready(function(){
+        ins.addEndpoint(nodeName,{
+          anchors:[position]
+        },common)
+      })
+      console.log(nodeName+"节点已经添加端点");
+    },
+    addAllPoint(){
+      for (let i = this.nodeStruct.length-1;i>=0;i--){
+        for (let j=0;j<this.nodeStruct[i].length;j++){
+          //给每一个非头节点添加上endPoint
+          if(i != 0){
+            this.addPoint(this.nodeStruct[i][j].nodeName,"Top",-1);
+          }
+          //给每一个按钮加上endPoint
+          for(let k=0;k<this.nodeStruct[i][j].branchArray.length;k++){
+            let btnName = this.nodeStruct[i][j].nodeName + this.nodeStruct[i][j].branchArray[k].branchType;
+            this.addPoint(btnName,"Bottom");
+          }
+        }
+      }
+    },
+    addAllLines(){
+      let ins = this.$jsPlumb;
+      let lines = this.branchList;
+      ins.ready(function(){
+        for (let i = 0;i<lines.length;i++){
+          ins.connect({
+              source:lines[i].source,
+              target:lines[i].target,
+              endpoint:"Dot",
+            }
+          );
+        }
+      })
+    },
+    removeNode(nodeName){
+      let ins = this.$jsPlumb;
+
+      ins.ready(function(){
+        ins.remove(nodeName);
+      })
     }
   },
   mounted() {
     this.orderData(this.cardInfo);
+    //this.addPoint("开场白肯定")
+
     this.calculatePosition();
     let ins = this.$jsPlumb;
     let list = this.travelsalListNames;
+    let branchList = this.branchList;
+    this.addAllPoint();
+    this.addAllLines();
+    // this.addPoint("开场白肯定","Bottom");
+    // this.addPoint("开场白否定","Bottom");
     ins.ready(function(){
-      ins.connect({
-        source:'box1',
-        target:'card2',
-        endpoint:'Dot'
-      })
-
       ins.draggable(list);
     })
+
+
   }
+
 
 }
 </script>
@@ -447,7 +518,7 @@ export default {
   }
   .box {
     position: absolute;
-    height: 180px;
+    height: 0px;
     width: 480px;
     top:0px;
   }
