@@ -6,19 +6,19 @@
 
 ### 1.通过获取的数据自动生成所有流程图
 
-![通过获取的数据自动生成所有流程图](D:\VueProject\element\README.assets\通过获取的数据自动生成所有流程图.png)
+![通过获取的数据自动生成所有流程图](https://raw.githubusercontent.com/Duangi/FlowChart/master/README.assets/%E9%80%9A%E8%BF%87%E8%8E%B7%E5%8F%96%E7%9A%84%E6%95%B0%E6%8D%AE%E8%87%AA%E5%8A%A8%E7%94%9F%E6%88%90%E6%89%80%E6%9C%89%E6%B5%81%E7%A8%8B%E5%9B%BE.png)
 
 ### 2.拖动节点
 
-![a69393fa-350f-48b4-8ee9-eb84a0327690](D:\VueProject\element\README.assets\a69393fa-350f-48b4-8ee9-eb84a0327690.gif)
+![拖动节点](https://raw.githubusercontent.com/Duangi/FlowChart/master/README.assets/%E6%8B%96%E5%8A%A8%E8%8A%82%E7%82%B9.gif)
 
 ### 3.删除分支点
 
-![624fa2f4-50b3-4332-aee0-a9ca1c00e7cc](D:\VueProject\element\README.assets\624fa2f4-50b3-4332-aee0-a9ca1c00e7cc.gif)
+![删除节点](https://raw.githubusercontent.com/Duangi/FlowChart/master/README.assets/%E5%88%A0%E9%99%A4%E8%8A%82%E7%82%B9.gif)
 
 ### 4.修改节点数据
 
-![624fa2f4-50b3-4332-aee0-a9ca1c00e7cc](D:\VueProject\element\README.assets\624fa2f4-50b3-4332-aee0-a9ca1c00e7cc-1615355941417.gif)
+![修改节点数据](https://raw.githubusercontent.com/Duangi/FlowChart/master/README.assets/%E4%BF%AE%E6%94%B9%E8%8A%82%E7%82%B9%E6%95%B0%E6%8D%AE.gif)
 
 ## Build Setup
 
