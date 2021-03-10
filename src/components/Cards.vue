@@ -1,56 +1,121 @@
 <template>
-  <div class="container">
-    <div v-for="(level,index) in nodeStruct" :key="index">
-      <div v-for="(card,index) in level" :key="index" v-bind:id="card.nodeName" class="box" v-bind:style="card.style">
-        <!--        如果直接设置el-card为draggable，会导致拖动的延迟很高，在外面套一个div，并将该div设置为draggable可以有效解决该问题-->
-        <el-card class="box-card">
-          <div slot="header" class="clearfix">
-            <input class="cardname" :readonly="readonly" v-model="card.nodeName" ></input>
-            <el-button class="cardbutton" type="danger" icon="el-icon-delete" circle @click="deleteCard(index)"></el-button>
-            <el-button class="cardbutton" :type="edit_button_type" :icon="edit_button_icon"  circle @click="toggleEditable"></el-button>
+  <el-container>
+    <el-header>
+      <div>
+        <el-button class="addNodeButton" type="primary" @click="addNodeSelectorShow = !addNodeSelectorShow">添加节点</el-button>
+        <el-select class="addNodeSelector" v-model="value" v-show="addNodeSelectorShow"  placeholder="请选择" @change="addNode(value)">
+          <el-option
+            v-for="item in addOptions"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value">
+          </el-option>
+        </el-select>
 
-          </div>
-
-          <el-input
-            type="textarea"
-            class="cardcontent"
-            :rows="3"
-            :readonly = "readonly"
-            autosize
-            v-model="card.content">
-          </el-input>
-          <div>
-            <el-row>
-              <el-col v-for="(branch,index) in card.branchArray" :key="index" :span="4">
-                <div class="buttoncontainer" v-bind:id="card.nodeName + branch.branchType">
-                  <el-button type="text" class="deletebutton" v-show="!readonly" icon="el-icon-close" @click="deleteLink(card.nodeName,branch.branchType)"></el-button>
-<!--                  <div v-bind:id="card.nodeName + branch.branchType" >{{ branch.branchType}}</div>-->
-                  <el-button  class="linkbutton" type="primary" >{{ branch.branchType}}</el-button>
-                </div>
-
-              </el-col>
-
-
-              <el-select class="selector" v-model="value" v-show="card.addselector" placeholder="请选择" @change="addSelectorButtonClicked(value,)">
-                <el-option
-                  v-for="item in options"
-                  :key="item.value"
-                  :label="item.label"
-                  :value="item.value">
-                </el-option>
-              </el-select>
-              <el-button class="addbutton" type="primary" icon="el-icon-plus" circle @click="card.addselector = !card.addselector"></el-button>
-            </el-row>
-
-            <!--        <div class = "type"  v-for="(type,index) in card.linktype" :key="index">{{type}}</div>-->
-
-          </div>
-        </el-card>
       </div>
-    </div>
+    </el-header>
+    <el-main>
+      <div class="container">
 
-  </div>
+        <div v-for="(level,index) in nodeStruct" :key="index">
+          <div v-for="(card,index) in level" :key="index" v-bind:id="card.nodeName" class="box" v-bind:style="card.style">
+            <!--        如果直接设置el-card为draggable，会导致拖动的延迟很高，在外面套一个div，并将该div设置为draggable可以有效解决该问题-->
+            <el-card class="box-card">
+              <div slot="header" class="clearfix">
+                <input class="cardname" :readonly="readonly" v-model="card.nodeName" ></input>
+                <el-button class="cardbutton" type="danger" icon="el-icon-delete" circle @click="deleteCard(index)"></el-button>
+                <el-button class="cardbutton" :type="edit_button_type" :icon="edit_button_icon"  circle @click="toggleEditable"></el-button>
 
+              </div>
+
+              <el-input
+                type="textarea"
+                class="cardcontent"
+                :rows="3"
+                :readonly = "readonly"
+                autosize
+                v-model="card.content">
+              </el-input>
+              <div>
+                <el-row>
+                  <el-col v-for="(branch,index) in card.branchArray" :key="index" :span="4">
+                    <div class="buttoncontainer" v-bind:id="card.nodeName + branch.branchType">
+                      <el-button type="text" class="deletebutton" v-show="!readonly" icon="el-icon-close" @click="deleteLink(card.nodeName,branch.branchType)"></el-button>
+                      <!--                  <div v-bind:id="card.nodeName + branch.branchType" >{{ branch.branchType}}</div>-->
+                      <el-button  class="linkbutton" type="primary" >{{ branch.branchType}}</el-button>
+                    </div>
+
+                  </el-col>
+
+
+                  <el-select class="selector"  v-model="value" v-show="card.addselector" placeholder="请选择" >
+                    <el-option
+                      v-for="item in options"
+                      :key="item.value"
+                      :label="item.label"
+                      :value="item.value"
+                    >
+                    </el-option>
+                  </el-select>
+                  <el-button class="addbutton" type="primary" icon="el-icon-plus" circle @click="card.addselector = !card.addselector"></el-button>
+                </el-row>
+
+                <!--        <div class = "type"  v-for="(type,index) in card.linktype" :key="index">{{type}}</div>-->
+
+              </div>
+            </el-card>
+          </div>
+        </div>
+        <div v-for="(card,index) in newNodes" :key="index" v-bind:id="card.nodeName" class="box">
+          <!--        如果直接设置el-card为draggable，会导致拖动的延迟很高，在外面套一个div，并将该div设置为draggable可以有效解决该问题-->
+          <el-card class="box-card">
+            <div slot="header" class="clearfix">
+              <input class="cardname" :readonly="readonly" v-model="card.nodeName" ></input>
+              <el-button class="cardbutton" type="danger" icon="el-icon-delete" circle @click="deleteCard(index)"></el-button>
+              <el-button class="cardbutton" :type="edit_button_type" :icon="edit_button_icon"  circle @click="toggleEditable"></el-button>
+
+            </div>
+
+            <el-input
+              type="textarea"
+              class="cardcontent"
+              :rows="3"
+              :readonly = "readonly"
+              autosize
+              v-model="card.content">
+            </el-input>
+            <div>
+              <el-row>
+                <el-col v-for="(branch,index) in card.branchArray" :key="index" :span="4">
+                  <div class="buttoncontainer" v-bind:id="card.nodeName + branch.branchType">
+                    <el-button type="text" class="deletebutton" v-show="!readonly" icon="el-icon-close" @click="deleteLink(card.nodeName,branch.branchType)"></el-button>
+                    <!--                  <div v-bind:id="card.nodeName + branch.branchType" >{{ branch.branchType}}</div>-->
+                    <el-button  class="linkbutton" type="primary" >{{ branch.branchType}}</el-button>
+                  </div>
+
+                </el-col>
+
+
+                <el-select class="selector" v-show="card.addselector" placeholder="请选择" @change="addSelectorButtonClicked(value)">
+                  <el-option
+                    v-for="item in options"
+                    :key="item.value"
+                    :label="item.label"
+                    :value="item.value">
+                  </el-option>
+                </el-select>
+                <el-button class="addbutton" type="primary" icon="el-icon-plus" circle @click="card.addselector = !card.addselector"></el-button>
+              </el-row>
+
+              <!--        <div class = "type"  v-for="(type,index) in card.linktype" :key="index">{{type}}</div>-->
+
+            </div>
+          </el-card>
+        </div>
+
+        </div>
+    </el-main>
+  </el-container>
 </template>
 
 <script>
@@ -236,7 +301,20 @@ export default {
       }
       ],
       value:"",
-      jumptype:["正向","肯定","拒绝","其他","待确认","待定","快说","投诉","重复","确认","参加","在听"]
+      addOptions: [{
+        value: 1,
+        label: '头节点'
+      }, {
+        value: 2,
+        label: '普通节点'
+      }, {
+        value: 3,
+        label: '尾节点'
+      },
+      ],
+      //控制node添加selector的显示状况
+      addNodeSelectorShow:false,
+      newNodes:[],
     }
   },
   methods:{
@@ -258,6 +336,7 @@ export default {
     },
     deleteLink(nodeName,branchType){
       this.removeNode(nodeName+branchType);
+      console.log(nodeName+branchType + "已被删除")
       //删除结构中的数据
       for (let i = 0;i<this.cardInfo.speechcraftList.length;i++){
         if(this.cardInfo.speechcraftList[i].nodeName == nodeName){
@@ -486,6 +565,20 @@ export default {
       ins.ready(function(){
         ins.remove(nodeName);
       })
+    },
+    addNode(value){
+      let nodeInfo = {
+        'nodeName' : '',
+        'speechcraftNum':"2T001",
+        'nodeState' : value,
+        'tagIntention' : [],
+        'speechcraftContent':"",
+        'branchArray':[],
+        'markupTags':[],
+      }
+      //将新节点添加到
+      this.newNodes.push(nodeInfo);
+
     }
   },
   mounted() {
@@ -515,6 +608,12 @@ export default {
   .addbutton{
     float: right;
     margin-right: 10px;
+  }
+  .addNodeButton{
+    float: left;
+  }
+  .addNodeSelector{
+    float: left;
   }
   .box {
     position: absolute;
@@ -550,9 +649,8 @@ export default {
   .container {
     position: relative;
     padding: 20px;
-    width: 80%;
-    height: 400px;
-    border: 1px solid gray;
+    width: 100%;
+    height: 800px;
   }
   .deletebutton{
     /*z-index: 5;*/
